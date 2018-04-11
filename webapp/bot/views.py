@@ -1,3 +1,4 @@
+from __future__ import unicode_literals, print_function
 from django.http import JsonResponse
 from django.shortcuts import render
 
@@ -5,20 +6,28 @@ from .forms import QueryForm, UserPreferencesForm
 from bot.logic import intents, replies, suggestions
 from .models import Response, UserPreferences
 
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
+from datetime import datetime, timedelta
 
+import traceback
 import json
 import os
 import requests
 
 import sys
 
+# spaCy imports
+import plac
+import spacy
+
+# wikipedia parser
+import wikipedia
+import unicodedata
+
+# app-specific import not important to us
+from footsie import Scraper
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/' + '/../../scraper'))
 
-from footsie import Scraper
-from datetime import datetime, timedelta
-
-import traceback
 
 def index(request):
     """
@@ -58,7 +67,43 @@ def chat(request):
                 query = form.save()
                 question = form.cleaned_data['question']
 
-                dialogflow_key = os.environ.get('DIALOGFLOW_CLIENT_ACCESS_TOKEN')
+                # sentence subject extraction - named entities
+                nlp = spacy.load('en')
+                doc = nlp(question)
+                subjects = []
+
+                for ent in doc.ents:
+                    print(ent.text, ent.start_char, ent.end_char, ent.label_)
+                    subjects.append(ent.text)
+
+                # search wikipedia for the subjects and append to knowledge base
+
+                for x in subjects:
+                    wikisearch = wikipedia.search(x)
+                    search_terms = list(OrderedDict.fromkeys(wikisearch))
+                    for y in search_terms:
+                        page = wikipedia.page(y)
+                        title = unicodedata.normalize('NFKD', page.title)\
+                            .encode('ascii', 'ignore')
+                        print(title)
+                        content = unicodedata.normalize('NFKD', page.content)\
+                            .encode('ascii', 'ignore')
+                        
+                        # path to knowledge base
+
+                        filename = "./dataset/" + title
+                        print('%s\n' % filename)
+                        with open(filename, 'w') as file:
+                            print('Writing file: %s\n' % (title))
+                            file.write(content)
+
+                # Leaving this original code commented so you can see 
+                # what was originally being done:
+                # Speech to Text Processing and 
+                # Tagging the question to a specific type of query regarding stocks
+
+                '''
+                dialogflow_key = 'os.environ.get('DIALOGFLOW_CLIENT_ACCESS_TOKEN')'
                 dialogflow_api = 'https://api.dialogflow.com/v1/query?v=20150910'
                 headers = {'Authorization': 'Bearer ' + dialogflow_key,
                            'Content-Type': 'application/json'}
@@ -99,12 +144,23 @@ def chat(request):
                         response['text'] = r['result']['fulfillment']['speech']
                         response['speech'] = r['result']['fulfillment']['speech']
                         response['type'] = 'simple.response'
+                '''
 
+                # Rudresh, Avais: Add Backend Processing Code Here
+
+                message = "Custom Answer from model"
+                response['text'] = message
+                response['speech'] = message
+                
+                # not changing the response type in case it breaks
+                # doesn't matter to us anyway
+                
+                response['type'] = 'error'
                 reply = Response(query=query, response=json.dumps(response))
                 reply.save()
 
-                if response['type'] not in ('error', 'members', 'comparison', 'briefing', 'input.unknown', 'incomplete', 'simple.response'):
-                    response = suggestions.add_suggestions(response, r)
+                #if response['type'] not in ('error', 'members', 'comparison', 'briefing', 'input.unknown', 'incomplete', 'simple.response'):
+                #    response = suggestions.add_suggestions(response, r)
 
                 form = QueryForm()
         else:

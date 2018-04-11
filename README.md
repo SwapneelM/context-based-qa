@@ -1,7 +1,6 @@
-# Aeora
+# Context-based Question-Answering
 
-**The ChatBot for traders, providing answers to questions on the FTSE 100.   
-Built for quick and intellectual conversations.**
+**A context based question answering system developed as part of the Bachelor's Thesis.**
 
 ![Laptop view](webapp/bot/static/images/laptop_view.gif)
 
@@ -13,3 +12,9 @@ Install all the dependencies using the command:
 This is a Django project therefore the command you need to run it is:
 
     python3 manage.py runserver
+
+Note: You will need to download spacy models to run the code as-is:
+
+    python -m 
+
+Interface based on the chatbot developed by [Alex Motoc](https://github.com/alexmotoc).
