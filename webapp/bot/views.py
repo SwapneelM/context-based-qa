@@ -13,7 +13,7 @@ import traceback
 import json
 import os
 import requests
-
+import unicodedata
 import sys
 
 # spaCy imports
@@ -22,7 +22,6 @@ import spacy
 
 # wikipedia parser
 import wikipedia
-import unicodedata
 
 # app-specific import not important to us
 from footsie import Scraper
@@ -89,14 +88,22 @@ def chat(request):
                         content = unicodedata.normalize('NFKD', page.content)\
                             .encode('ascii', 'ignore')
                         
+                        # decode bytes to unicode for compatibility with Python3
+                        title = title.decode('UTF-8')
+                        content = content.decode('UTF-8')
+                        
                         # path to knowledge base
-
-                        filename = "./dataset/" + title
-                        print('%s\n' % filename)
-                        with open(filename, 'w') as file:
-                            print('Writing file: %s\n' % (title))
-                            file.write(content)
-
+                        filename = "dataset/" + title
+                        
+                        # write data to file within knowledge base
+                        try:
+                            with open(filename, 'w+') as file:
+                                print('Writing file: %s\n' % (str(title)))
+                                file.write(content)
+                        except wikipedia.exceptions.DisambiguationError as e:
+                            print("Wikipedia download limit reached, \
+                                knowledge transfer will run in the background.")
+                            print("Error: {0}".format(e))
                 # Leaving this original code commented so you can see 
                 # what was originally being done:
                 # Speech to Text Processing and 

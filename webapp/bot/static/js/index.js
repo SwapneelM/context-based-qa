@@ -116,10 +116,10 @@ $(document).ready(function(){
 
       $(".typed").typed({
       		strings: [
-            "Hey Aeora, tell me about my day!",
-            "What is the price of Barclays?",
-            "How are Beverages performing?",
-            "Who are the top risers?"
+            "Who is Donald Trump?",
+            "What country is he the President of?",
+            "Where was he born?",
+            "What is his favourite game?"
           ],
       		// typing speed
       		typeSpeed: 75,
