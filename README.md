@@ -1,6 +1,6 @@
 # Context-based Question-Answering
 
-**A context based question answering system developed as part of the Bachelor's Thesis.**
+**A context based question answering system developed as part of the Bachelor's Thesis with [Avais Pagarkar](https://github.com/avaisp) and [Rudresh Panchal](https://github.com/rpanchal1996).**
 
 ## Installation
 Install all the dependencies using the command:
